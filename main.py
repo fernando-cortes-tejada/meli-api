@@ -4,8 +4,6 @@ from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 
-import json
-
 from utils import replace_special_characters
 from entities import MELI_BASE_URL, MELI_HTML_KEYS
 
