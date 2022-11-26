@@ -42,10 +42,18 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
 
     print(dict_)
 
-    price = soup_product.find(**meli_html_keys["price"])
+    price = soup_product.find_all(**meli_html_keys["price"])
     if bool(price):
-        price = int(price.text.replace(".", ""))
-        dict_["price"] = price
+        full_price = int(price[0].text.replace(".", ""))
+        dict_["price"] = full_price
+        try:
+            price_w_disc = int(price[1].text.replace(".", ""))
+            dict_["price_w_discount"] = price_w_disc
+            disc_perc = soup_product.find(**meli_html_keys["discount_perc"])
+            disc_perc = disc_perc.text.split()[0]
+            dict_["discount_percentage"] = disc_perc
+        except:
+            None
 
     subtitle = soup_product.find(**meli_html_keys["subtitle"])
     if bool(subtitle):

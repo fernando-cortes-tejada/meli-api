@@ -3,6 +3,7 @@ MELI_HTML_KEYS = {
     "CO": {
         "title": {"name": "h1", "class_": "ui-pdp-title"},
         "price": {"name": "span", "class_": "andes-money-amount__fraction"},
+        "discount_perc": {"name": "span", "class_": "andes-money-amount__discount"},
         "subtitle": {"name": "span", "class_": "ui-pdp-subtitle"},
         "img": {"name": "img", "class_": "ui-pdp-image ui-pdp-gallery__figure__image"},
         "categories": {"name": "a", "class_": "andes-breadcrumb__link"},
