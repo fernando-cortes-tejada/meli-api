@@ -40,8 +40,6 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     if bool(title):
         dict_ = {"name": replace_special_characters(title.text)}
 
-    print(dict_)
-
     price = soup_product.find_all(**meli_html_keys["price"])
     if bool(price):
         full_price = int(price[0].text.replace(".", ""))
@@ -73,8 +71,6 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     stars = soup_product.find(**meli_html_keys["stars"])
     if bool(stars):
         dict_["reviews"] = {"stars": float(stars.text)}
-
-    print(dict_)
 
     num_reviews = soup_product.find(**meli_html_keys["num_reviews"])
     if bool(num_reviews):
