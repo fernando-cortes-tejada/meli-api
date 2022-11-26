@@ -3,3 +3,4 @@ uvicorn
 pydantic
 bs4
 requests_html
+nest-asyncio
