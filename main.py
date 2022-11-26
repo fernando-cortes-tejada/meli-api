@@ -28,12 +28,14 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
 
     async def get_product():
         product_req = await session.get(product_url)
-        await product_req.html.arender(sleep=5)
+        await product_req.html.arender(sleep=1)
         return product_req
 
     product_req = session.run(get_product)
 
     soup_product = BeautifulSoup(product_req[0].text, "html.parser")
+
+    session.close()
 
     meli_html_keys = MELI_HTML_KEYS[country_code]
     title = soup_product.find(**meli_html_keys["title"])
