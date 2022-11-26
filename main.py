@@ -6,6 +6,11 @@ from requests_html import AsyncHTMLSession
 from utils import replace_special_characters
 from entities import MELI_BASE_URL, MELI_HTML_KEYS
 
+import nest_asyncio
+
+nest_asyncio.apply()
+__import__("IPython").embed()
+
 app = FastAPI()
 
 
