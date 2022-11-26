@@ -14,11 +14,8 @@ __import__("IPython").embed()
 app = FastAPI()
 
 
-# @app.get("/product_details/{country_code}/{code_or_url}")
-@app.get("/product_details/{country_code}/{full_path:path}")
-async def nuestro_comps(country_code: str, full_path: str) -> dict:
-    return {"country_code": country_code, "path": full_path}
-
+@app.get("/product_details/{country_code}/{code_or_url:path}")
+async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     meli_base_url = MELI_BASE_URL[country_code]
     if len(code_or_url) > 15:
         product_url = code_or_url
@@ -34,7 +31,6 @@ async def nuestro_comps(country_code: str, full_path: str) -> dict:
 
     product_req = session.run(get_product)
     product_req[0].html.arender(sleep=1)
-    # product_req[0].html.render(sleep=1)
 
     soup_product = BeautifulSoup(product_req[0].text, "html.parser")
 
