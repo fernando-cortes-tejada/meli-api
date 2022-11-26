@@ -28,7 +28,7 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
 
     async def get_product():
         product_req = await session.get(product_url)
-        await product_req.html.arender(sleep=1)
+        await product_req.html.arender(sleep=5)
         return product_req
 
     product_req = session.run(get_product)
@@ -62,34 +62,17 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
         categories = [replace_special_characters(list_["title"]) for list_ in list_cat]
         dict_["categories"] = categories
 
-    reviews = soup_product.find(**meli_html_keys["reviews"])
-    reviews_url = f"{meli_base_url}{reviews.get('href')}"
-
-    # session2 = AsyncHTMLSession()
-
-    # async def get_reviews():
-    #    reviews_req = await session.get(reviews_url)
-    #    return reviews_req
-
-    # reviews_req = session2.run(get_reviews)
-    # reviews_req[0].html.arender(sleep=0)
-
-    # soup_reviews = BeautifulSoup(reviews_req[0].text, "html.parser")
-
-    reviews_page = requests.get(reviews_url)
-    soup_reviews = BeautifulSoup(reviews_page.content, "html.parser")
-
-    stars = soup_reviews.find(**meli_html_keys["stars"])
+    stars = soup_product.find(**meli_html_keys["stars"])
     if bool(stars):
         dict_["reviews"] = {"stars": float(stars.text)}
 
     print(dict_)
 
-    num_reviews = soup_reviews.find(**meli_html_keys["num_reviews"])
+    num_reviews = soup_product.find(**meli_html_keys["num_reviews"])
     if bool(num_reviews):
         dict_["reviews"]["quantity"] = int(num_reviews.text.split()[0])
 
-    num_stars = soup_reviews.find_all(**meli_html_keys["num_stars"])
+    num_stars = soup_product.find_all(**meli_html_keys["num_stars"])
     if bool(num_stars):
         dict_["reviews"]["stars_dist"] = dict(
             zip(
@@ -98,7 +81,7 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
             )
         )
 
-    best_review = soup_reviews.find(**meli_html_keys["best_review"])
+    best_review = soup_product.find(**meli_html_keys["best_review"])
     if bool(best_review):
         dict_["reviews"]["best_review"] = replace_special_characters(best_review.text)
 
