@@ -66,14 +66,21 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     reviews_url = f"{meli_base_url}{reviews.get('href')}"
 
     session2 = AsyncHTMLSession()
-    reviews_req = session2.get(reviews_url)
-    reviews_req.html.render(sleep=0)
 
-    soup_reviews = BeautifulSoup(reviews_req.text, "html.parser")
+    async def get_reviews():
+        reviews_req = await session.get(reviews_url)
+        return reviews_req
+
+    reviews_req = session2.run(get_reviews)
+    reviews_req[0].html.arender(sleep=0)
+
+    soup_reviews = BeautifulSoup(reviews_req[0].text, "html.parser")
 
     stars = soup_reviews.find(**meli_html_keys["stars"])
     if bool(stars):
         dict_["reviews"] = {"stars": float(stars.text)}
+
+    print(dict_)
 
     num_reviews = soup_reviews.find(**meli_html_keys["num_reviews"])
     if bool(num_reviews):
