@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from bs4 import BeautifulSoup
-from requests_html import HTMLSession
+from requests_html import AsyncHTMLSession
 
 from utils import replace_special_characters
 from entities import MELI_BASE_URL, MELI_HTML_KEYS
@@ -10,7 +10,7 @@ app = FastAPI()
 
 
 @app.get("/product_details/{country_code}/{code_or_url}")
-def nuestro_comps(country_code: str, code_or_url: str) -> dict:
+async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     meli_base_url = MELI_BASE_URL[country_code]
     if len(code_or_url) > 15:
         product_url = code_or_url
@@ -18,16 +18,24 @@ def nuestro_comps(country_code: str, code_or_url: str) -> dict:
         product_code = code_or_url
         product_url = f"{meli_base_url}//p/{product_code}"
 
-    session = HTMLSession()
-    product_req = session.get(product_url)
-    product_req.html.render(sleep=1)
+    session = AsyncHTMLSession()
 
-    soup_product = BeautifulSoup(product_req.text, "html.parser")
+    async def get_product():
+        product_req = await session.get(product_url)
+        return product_req
+
+    product_req = session.run(get_product)
+    product_req[0].html.arender(sleep=1)
+    # product_req[0].html.render(sleep=1)
+
+    soup_product = BeautifulSoup(product_req[0].text, "html.parser")
 
     meli_html_keys = MELI_HTML_KEYS[country_code]
     title = soup_product.find(**meli_html_keys["title"])
     if bool(title):
         dict_ = {"name": replace_special_characters(title.text)}
+
+    print(dict_)
 
     price = soup_product.find(**meli_html_keys["price"])
     if bool(price):
@@ -52,7 +60,7 @@ def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     reviews = soup_product.find(**meli_html_keys["reviews"])
     reviews_url = f"{meli_base_url}{reviews.get('href')}"
 
-    session2 = HTMLSession()
+    session2 = AsyncHTMLSession()
     reviews_req = session2.get(reviews_url)
     reviews_req.html.render(sleep=0)
 
