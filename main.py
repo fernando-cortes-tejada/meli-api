@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+import requests
 from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
 
@@ -27,10 +28,10 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
 
     async def get_product():
         product_req = await session.get(product_url)
+        await product_req.html.arender(sleep=1)
         return product_req
 
     product_req = session.run(get_product)
-    product_req[0].html.arender(sleep=1)
 
     soup_product = BeautifulSoup(product_req[0].text, "html.parser")
 
@@ -64,16 +65,19 @@ async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     reviews = soup_product.find(**meli_html_keys["reviews"])
     reviews_url = f"{meli_base_url}{reviews.get('href')}"
 
-    session2 = AsyncHTMLSession()
+    # session2 = AsyncHTMLSession()
 
-    async def get_reviews():
-        reviews_req = await session.get(reviews_url)
-        return reviews_req
+    # async def get_reviews():
+    #    reviews_req = await session.get(reviews_url)
+    #    return reviews_req
 
-    reviews_req = session2.run(get_reviews)
-    reviews_req[0].html.arender(sleep=0)
+    # reviews_req = session2.run(get_reviews)
+    # reviews_req[0].html.arender(sleep=0)
 
-    soup_reviews = BeautifulSoup(reviews_req[0].text, "html.parser")
+    # soup_reviews = BeautifulSoup(reviews_req[0].text, "html.parser")
+
+    reviews_page = requests.get(reviews_url)
+    soup_reviews = BeautifulSoup(reviews_page.content, "html.parser")
 
     stars = soup_reviews.find(**meli_html_keys["stars"])
     if bool(stars):
