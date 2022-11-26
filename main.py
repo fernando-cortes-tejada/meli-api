@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
@@ -10,12 +9,8 @@ from entities import MELI_BASE_URL, MELI_HTML_KEYS
 app = FastAPI()
 
 
-class Credentials(BaseModel):
-    api_key: str
-
-
 @app.get("/product_details/{country_code}/{code_or_url}")
-async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
+def nuestro_comps(country_code: str, code_or_url: str) -> dict:
     meli_base_url = MELI_BASE_URL[country_code]
     if len(code_or_url) > 15:
         product_url = code_or_url
