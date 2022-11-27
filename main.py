@@ -109,7 +109,9 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
 
 
 @app.get("/product_urls/{country_code}/{search_string}/{page_number}")
-async def product_details(country_code: str, search_string: str, page_number=1) -> dict:
+async def product_details(
+    country_code: str, search_string: str, page_number: int = 1
+) -> dict:
     meli_base_listing_url = MELI_BASE_URL[country_code]["listing"]
     search_string = search_string.lower().replace(" ", "-")
     if page_number > 1:
