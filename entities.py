@@ -1,4 +1,9 @@
-MELI_BASE_URL = {"CO": "https://www.mercadolibre.com.co"}
+MELI_BASE_URL = {
+    "CO": {
+        "base": "https://www.mercadolibre.com.co",
+        "listing": "https://listado.mercadolibre.com.co",
+    }
+}
 MELI_HTML_KEYS = {
     "CO": {
         "title": {"name": "h1", "class_": "ui-pdp-title"},
@@ -24,5 +29,12 @@ MELI_HTML_KEYS = {
             "name": "p",
             "class_": "ui-review-capability-comments__comment__content",
         },
+        "listing_url": {
+            "name": "a",
+            "class_": "ui-search-item__group__element shops__items-group-details ui-search-link",
+        },
+        "current_page": {
+            "name":"span", "class_":"andes-pagination__link"
+        }
     }
 }

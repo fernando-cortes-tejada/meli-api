@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-import requests
 from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
 
@@ -33,7 +32,7 @@ def available_country_codes() -> dict:
 
 @app.get("/product_details/{country_code}/{code_or_url:path}")
 async def product_details(country_code: str, code_or_url: str) -> dict:
-    meli_base_url = MELI_BASE_URL[country_code]
+    meli_base_url = MELI_BASE_URL[country_code]["base"]
     if len(code_or_url) > 15:
         product_url = code_or_url
     else:
@@ -105,5 +104,40 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
     best_review = soup_product.find(**meli_html_keys["best_review"])
     if bool(best_review):
         dict_["reviews"]["best_review"] = replace_special_characters(best_review.text)
+
+    return dict_
+
+
+@app.get("/product_urls/{country_code}/{search_string}")
+async def product_details(country_code: str, search_string: str) -> dict:
+    meli_base_listing_url = MELI_BASE_URL[country_code]["listing"]
+    listing_url = f"{meli_base_listing_url}/{search_string}"
+
+    session = AsyncHTMLSession()
+
+    async def get_listing():
+        listing_req = await session.get(listing_url)
+        await listing_req.html.arender(sleep=1)
+        await session.close()
+        return listing_req
+
+    listing_req = session.run(get_listing)
+
+    soup_listing = BeautifulSoup(listing_req[0].text, "html.parser")
+
+    meli_html_keys = MELI_HTML_KEYS[country_code]
+    listing_data = soup_listing.find_all(**meli_html_keys["listing_url"])
+
+    product_names = [data.text for data in listing_data if data]
+    product_urls = [data.get("href") for data in listing_data if data]
+
+    current_page = int(soup_listing.find(**meli_html_keys["current_page"]).text)
+
+    list_ = []
+    for product_name, product_url in zip(product_names, product_urls):
+        dict__ = {"name": product_name, "url": product_url}
+        list_.append(dict__)
+
+    dict_ = {"total_urls": len(product_urls), "page": current_page, "products": list_}
 
     return dict_
