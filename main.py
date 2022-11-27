@@ -15,8 +15,24 @@ __import__("IPython").embed()
 app = FastAPI()
 
 
+@app.get("/available_country_codes")
+def available_country_codes() -> dict:
+    dict_ = {
+        "available": {"Colombia": "CO"},
+        "coming_soon": {
+            "Peru": "PE",
+            "Argentina": "AR",
+            "Brazil": "BR",
+            "Mexico": "MX",
+            "Chile": "CL",
+            "Uruguay": "UY",
+        },
+    }
+    return dict_
+
+
 @app.get("/product_details/{country_code}/{code_or_url:path}")
-async def nuestro_comps(country_code: str, code_or_url: str) -> dict:
+async def product_details(country_code: str, code_or_url: str) -> dict:
     meli_base_url = MELI_BASE_URL[country_code]
     if len(code_or_url) > 15:
         product_url = code_or_url
