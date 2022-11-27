@@ -108,16 +108,21 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
     return dict_
 
 
-@app.get("/product_urls/{country_code}/{search_string}/{page_number}")
+@app.get("/product_urls/{country_code}/{search_string}")
 async def product_details(
     country_code: str, search_string: str, page_number: int = 1
 ) -> dict:
     meli_base_listing_url = MELI_BASE_URL[country_code]["listing"]
     search_string = search_string.lower().replace(" ", "-")
-    if page_number > 1:
-        listing_url = f"{meli_base_listing_url}/{search_string}_Desde_{str(1 + (page_number-1) * 50)}_NoIndex_True"
-    else:
+    try:
+        page_number
+    except:
         listing_url = f"{meli_base_listing_url}/{search_string}"
+    else:
+        if page_number == 1:
+            listing_url = f"{meli_base_listing_url}/{search_string}"
+        else:
+            listing_url = f"{meli_base_listing_url}/{search_string}_Desde_{str(1 + (page_number-1) * 50)}_NoIndex_True"
 
     session = AsyncHTMLSession()
 
