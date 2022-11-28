@@ -86,7 +86,9 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
 
     num_reviews = soup_product.find(**MELI_HTML_KEYS["num_reviews"])
     if bool(num_reviews):
-        dict_["reviews"]["quantity"] = int(num_reviews.text.split()[0])
+        dict_["reviews"]["quantity"] = int(
+            num_reviews.text.split()[0].replace(".", "").replace(",", "")
+        )
 
     num_stars = soup_product.find_all(**MELI_HTML_KEYS["num_stars"])
     if bool(num_stars):
