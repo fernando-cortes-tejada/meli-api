@@ -105,7 +105,7 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
 async def product_details(
     country_code: str, search_string: str, page_number: int = 1
 ) -> dict:
-    meli_base_listing_url = MELI_BASE_URL["listing"]
+    meli_base_listing_url = f"{MELI_BASE_URL['listing']}.{country_code}"
     if country_code.lower() == "cl":
         meli_base_listing_url = meli_base_listing_url.replace(".com", "")
     if country_code.lower() == "br":
