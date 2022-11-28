@@ -45,6 +45,19 @@ COUNTRIES_AVAILABILITY = {
         "Mexico": "MX",
         "Chile": "CL",
         "Brazil": "BR",
-    }
+    },
+    "coming_soon": {
+        "Ecuador": "EC",
+        "Venezuela": "VE",
+        "Bolivia": "BO",
+        "Paraguay": "PY",
+        "Costa Rica": "CR",
+        "El Salvador": "SV",
+        "Guatemala": "GT",
+        "Honduras": "HN",
+        "Nicaragua": "NI",
+        "Panama": "PA",
+        "Republica Dominicana": "DO",
+    },
 }
 
