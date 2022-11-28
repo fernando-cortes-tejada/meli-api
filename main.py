@@ -55,12 +55,15 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
         dict_["price"] = full_price
         try:
             price_w_disc = int(price[1].text.replace(".", "").replace(",", ""))
-            dict_["price_w_discount"] = price_w_disc
-            disc_perc = soup_product.find(**MELI_HTML_KEYS["discount_perc"])
-            disc_perc = disc_perc.text.split()[0]
-            dict_["discount_percentage"] = disc_perc
         except:
             None
+        else:
+            strike = soup_product.find(**MELI_HTML_KEYS["strike"])
+            if bool(strike):
+                dict_["price_w_discount"] = price_w_disc
+                disc_perc = soup_product.find(**MELI_HTML_KEYS["discount_perc"])
+                disc_perc = disc_perc.text.split()[0]
+                dict_["discount_percentage"] = disc_perc
 
     subtitle = soup_product.find(**MELI_HTML_KEYS["subtitle"])
     if bool(subtitle):
@@ -111,7 +114,7 @@ async def product_details(
     if country_code.lower() == "br":
         meli_base_listing_url = meli_base_listing_url.replace(
             "listado", "lista"
-        ).replace("b", "v")
+        ).replace("libre", "livre")
     search_string = search_string.lower().replace(" ", "-")
     try:
         page_number
