@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
 
 from utils import replace_special_characters
-from entities import MELI_BASE_URL, MELI_HTML_KEYS
+from entities import MELI_BASE_URL, MELI_HTML_KEYS, COUNTRIES_AVAILABILITY
 
 import nest_asyncio
 
@@ -16,23 +16,17 @@ app = FastAPI()
 
 @app.get("/available_country_codes")
 def available_country_codes() -> dict:
-    dict_ = {
-        "available": {"Colombia": "CO"},
-        "coming_soon": {
-            "Peru": "PE",
-            "Argentina": "AR",
-            "Brazil": "BR",
-            "Mexico": "MX",
-            "Chile": "CL",
-            "Uruguay": "UY",
-        },
-    }
+    dict_ = COUNTRIES_AVAILABILITY
     return dict_
 
 
 @app.get("/product_details/{country_code}/{code_or_url:path}")
 async def product_details(country_code: str, code_or_url: str) -> dict:
-    meli_base_url = MELI_BASE_URL[country_code]["base"]
+    meli_base_url = f"{MELI_BASE_URL['base']}.{country_code}"
+    if country_code.lower() == "cl":
+        meli_base_url = meli_base_url.replace(".com", "")
+    if country_code.lower() == "br":
+        meli_base_url = meli_base_url.replace("b", "v")
     if len(code_or_url) > 15:
         product_url = code_or_url
     else:
@@ -51,48 +45,47 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
 
     soup_product = BeautifulSoup(product_req[0].text, "html.parser")
 
-    meli_html_keys = MELI_HTML_KEYS[country_code]
-    title = soup_product.find(**meli_html_keys["title"])
+    title = soup_product.find(**MELI_HTML_KEYS["title"])
     if bool(title):
         dict_ = {"name": replace_special_characters(title.text)}
 
-    price = soup_product.find_all(**meli_html_keys["price"])
+    price = soup_product.find_all(**MELI_HTML_KEYS["price"])
     if bool(price):
         full_price = int(price[0].text.replace(".", ""))
         dict_["price"] = full_price
         try:
             price_w_disc = int(price[1].text.replace(".", ""))
             dict_["price_w_discount"] = price_w_disc
-            disc_perc = soup_product.find(**meli_html_keys["discount_perc"])
+            disc_perc = soup_product.find(**MELI_HTML_KEYS["discount_perc"])
             disc_perc = disc_perc.text.split()[0]
             dict_["discount_percentage"] = disc_perc
         except:
             None
 
-    subtitle = soup_product.find(**meli_html_keys["subtitle"])
+    subtitle = soup_product.find(**MELI_HTML_KEYS["subtitle"])
     if bool(subtitle):
         [condition, sales] = [subtitle.text.split()[i] for i in [0, 2]]
         dict_["condition"] = condition
         dict_["sales"] = sales
 
-    img = soup_product.find(**meli_html_keys["img"])
+    img = soup_product.find(**MELI_HTML_KEYS["img"])
     if bool(img):
         dict_["img_url"] = img.get("src")
 
-    list_cat = soup_product.find_all(**meli_html_keys["categories"])
+    list_cat = soup_product.find_all(**MELI_HTML_KEYS["categories"])
     if bool(list_cat):
         categories = [replace_special_characters(list_["title"]) for list_ in list_cat]
         dict_["categories"] = categories
 
-    stars = soup_product.find(**meli_html_keys["stars"])
+    stars = soup_product.find(**MELI_HTML_KEYS["stars"])
     if bool(stars):
         dict_["reviews"] = {"stars": float(stars.text)}
 
-    num_reviews = soup_product.find(**meli_html_keys["num_reviews"])
+    num_reviews = soup_product.find(**MELI_HTML_KEYS["num_reviews"])
     if bool(num_reviews):
         dict_["reviews"]["quantity"] = int(num_reviews.text.split()[0])
 
-    num_stars = soup_product.find_all(**meli_html_keys["num_stars"])
+    num_stars = soup_product.find_all(**MELI_HTML_KEYS["num_stars"])
     if bool(num_stars):
         dict_["reviews"]["stars_dist"] = dict(
             zip(
@@ -101,7 +94,7 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
             )
         )
 
-    best_review = soup_product.find(**meli_html_keys["best_review"])
+    best_review = soup_product.find(**MELI_HTML_KEYS["best_review"])
     if bool(best_review):
         dict_["reviews"]["best_review"] = replace_special_characters(best_review.text)
 
@@ -112,7 +105,13 @@ async def product_details(country_code: str, code_or_url: str) -> dict:
 async def product_details(
     country_code: str, search_string: str, page_number: int = 1
 ) -> dict:
-    meli_base_listing_url = MELI_BASE_URL[country_code]["listing"]
+    meli_base_listing_url = MELI_BASE_URL["listing"]
+    if country_code.lower() == "cl":
+        meli_base_listing_url = meli_base_listing_url.replace(".com", "")
+    if country_code.lower() == "br":
+        meli_base_listing_url = meli_base_listing_url.replace(
+            "listado", "lista"
+        ).replace("b", "v")
     search_string = search_string.lower().replace(" ", "-")
     try:
         page_number
@@ -136,13 +135,12 @@ async def product_details(
 
     soup_listing = BeautifulSoup(listing_req[0].text, "html.parser")
 
-    meli_html_keys = MELI_HTML_KEYS[country_code]
-    listing_data = soup_listing.find_all(**meli_html_keys["listing_url"])
+    listing_data = soup_listing.find_all(**MELI_HTML_KEYS["listing_url"])
 
     product_names = [data.text for data in listing_data if data]
     product_urls = [data.get("href") for data in listing_data if data]
 
-    current_page = int(soup_listing.find(**meli_html_keys["current_page"]).text)
+    current_page = int(soup_listing.find(**MELI_HTML_KEYS["current_page"]).text)
 
     list_ = []
     for product_name, product_url in zip(product_names, product_urls):
