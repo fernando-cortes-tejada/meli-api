@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import FastAPI
 
 from bs4 import BeautifulSoup
@@ -12,6 +13,12 @@ nest_asyncio.apply()
 __import__("IPython").embed()
 
 app = FastAPI()
+
+
+@app.get("/start_meli_engine")
+def start_meli_engine() -> None:
+    print(f"Inicio del motor: {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}")
+    return "Success"
 
 
 @app.get("/available_country_codes")
